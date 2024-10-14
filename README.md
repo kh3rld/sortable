@@ -35,7 +35,7 @@ Make sure you have a modern web browser and a basic understanding of HTML and Ja
 ## Code Structure
 
 - `index.html`: The main HTML file containing the structure of the application.
-- `heroTable.js`: Contains the JavaScript functions for fetching, filtering, sorting, and paginating the heroes.
+- `script.js`: Contains the JavaScript functions for fetching, filtering, sorting, and paginating the heroes.
 - `style.css`: Contains the styles for the table and layout.
 
 ## Running Tests
