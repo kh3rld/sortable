@@ -24,7 +24,9 @@ function renderTable() {
   paginatedHeroes.forEach((hero) => {
     const row = tbody.insertRow();
     row.innerHTML = `
-            <td><img src="${hero.images.xs}" alt="${hero.name}"></td>
+            <td><img src="${hero.images.xs}" alt="${
+      hero.name
+    } icon" width="50" height="50"></td>
             <td>${hero.name}</td>
             <td>${hero.biography.fullName || ""}</td>
             <td>${hero.powerstats.intelligence}</td>
@@ -43,6 +45,7 @@ function renderTable() {
   });
 
   renderPagination(filteredHeroes.length);
+  updateSortIndicators();
 }
 
 // Filter heroes based on search
@@ -80,7 +83,7 @@ function getNestedProperty(obj, path) {
 function paginateHeroes(heroes) {
   if (pageSize === "all") return heroes;
   const start = (currentPage - 1) * pageSize;
-  return heroes.slice(start, start + pageSize);
+  return heroes.slice(start, start + parseInt(pageSize));
 }
 
 // Render pagination controls
@@ -103,7 +106,27 @@ function renderPagination(totalHeroes) {
   });
   paginationDiv.appendChild(prevButton);
 
-  for (let i = 1; i <= totalPages; i++) {
+  const maxButtons = 5;
+  const startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+  const endPage = Math.min(totalPages, startPage + maxButtons - 1);
+
+  if (startPage > 1) {
+    const firstPageButton = document.createElement("button");
+    firstPageButton.textContent = "1";
+    firstPageButton.addEventListener("click", () => {
+      currentPage = 1;
+      renderTable();
+    });
+    paginationDiv.appendChild(firstPageButton);
+
+    if (startPage > 2) {
+      const ellipsis = document.createElement("span");
+      ellipsis.textContent = "...";
+      paginationDiv.appendChild(ellipsis);
+    }
+  }
+
+  for (let i = startPage; i <= endPage; i++) {
     const pageButton = document.createElement("button");
     pageButton.textContent = i;
     pageButton.disabled = i === currentPage;
@@ -112,6 +135,22 @@ function renderPagination(totalHeroes) {
       renderTable();
     });
     paginationDiv.appendChild(pageButton);
+  }
+
+  if (endPage < totalPages) {
+    if (endPage < totalPages - 1) {
+      const ellipsis = document.createElement("span");
+      ellipsis.textContent = "...";
+      paginationDiv.appendChild(ellipsis);
+    }
+
+    const lastPageButton = document.createElement("button");
+    lastPageButton.textContent = totalPages;
+    lastPageButton.addEventListener("click", () => {
+      currentPage = totalPages;
+      renderTable();
+    });
+    paginationDiv.appendChild(lastPageButton);
   }
 
   const nextButton = document.createElement("button");
@@ -124,6 +163,18 @@ function renderPagination(totalHeroes) {
     }
   });
   paginationDiv.appendChild(nextButton);
+}
+
+// Update sort indicators
+function updateSortIndicators() {
+  const headers = document.querySelectorAll("#heroTable th");
+  headers.forEach((header) => {
+    const headerText = header.textContent.toLowerCase().replace(" ", "");
+    header.classList.remove("sort-asc", "sort-desc");
+    if (headerText === sortColumn) {
+      header.classList.add(sortOrder === "asc" ? "sort-asc" : "sort-desc");
+    }
+  });
 }
 
 // Event listeners
@@ -150,3 +201,6 @@ document.querySelector("#heroTable thead").addEventListener("click", (e) => {
     renderTable();
   }
 });
+
+// Initial render
+renderTable();
